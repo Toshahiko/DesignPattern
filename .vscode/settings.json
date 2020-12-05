@@ -2,5 +2,5 @@
   "files.associations": {
     "memory": "cpp"
   },
-  "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, BreakBeforeBraces: Attach, SpaceBeforeParens: Never, IndentWidth: 2, SpacesBeforeTrailingComments: 1, Cpp11BracedListStyle: false, PointerAlignment: Left}"
+  "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, BreakBeforeBraces: Attach, SpaceBeforeParens: Never, IndentWidth: 2, SpacesBeforeTrailingComments: 1, Cpp11BracedListStyle: false, PointerAlignment: Left, SpacesInParentheses: true, AllowAllConstructorInitializersOnNextLine: false,  FixNamespaceComments: true, SpaceAfterCStyleCast: true, SpaceAfterTemplateKeyword: false, SpaceBeforeAssignmentOperators: true, SpaceBeforeCpp11BracedList: true, SpaceBeforeCtorInitializerColon: true, SpaceBeforeInheritanceColon: true, SpacesInConditionalStatement: true, SpacesInAngles: false, SpaceBeforeParens: ControlStatements }"
 }
