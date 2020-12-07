@@ -5,6 +5,7 @@
 #include <string>
 #include <assert.h>
 #include <iostream>
+#include <algorithm>
 
 class Fruit{
   public:
@@ -12,16 +13,30 @@ class Fruit{
     Apple,
     Orange,
   } ;
-  Fruit( const EnKind& kind) : m_kind( kind )
+  Fruit( const EnKind& kind ) : m_kind( kind )
   {}
   private:
   EnKind m_kind ;
  } ;
 
+
 namespace {
+class Person ;
+class PersonMemento {
+public:
+  int GetMoney() const {
+    return m_money ;
+  }
+  private:
+  PersonMemento( int money ) : m_money( money ) {}
+
+  friend Person ;
+  private:
+  int m_money ;
+};
   class Person{
     public:
-    explicit Person() : m_money( 1000 ) {
+    explicit Person() : m_money( 0 ) {
       std::random_device seed ;
       m_engine.seed( seed() ) ;
     }
@@ -30,6 +45,7 @@ namespace {
       std::uniform_int_distribution<> dist( 1, 6 ) ;
       return dist( m_engine ) ;
     }
+    int GetMoney() const { return m_money ; }
     void LoseMoney() {
       m_money -= 100 ;
     }
@@ -40,7 +56,15 @@ namespace {
       m_money *= 2 ;
     }
     void AquireFruit( const Fruit& fruit ) {
-      m_fruit.push_back( fu)
+      m_fruit.push_back( fruit ) ;
+    }
+    
+    PersonMemento CreateMemento() {
+      return PersonMemento( m_money ) ;
+    }
+
+    void RestoreMemento( const PersonMemento& memento ) {
+      m_money = memento.m_money ;
     }
     private:
     std::mt19937_64 m_engine ;
@@ -51,21 +75,28 @@ namespace {
 
 void MementoPattern() {
   Person mara ;
-  // while( true ) {
+  std::vector<PersonMemento> mara_part ;
+  mara_part.push_back( mara.CreateMemento() ) ;
   for ( int i = 0 ; i < 100 ; ++i ) {
-    auto dice = mara.Diceroll();
-
+    auto dice = mara.Diceroll() ;
     if (dice <= 3) {
-      mara.LoseMoney();
-    } else if ( dice <= 5 ) {
+      mara.LoseMoney() ;
+    } else if ( dice <= 5 ) { // aaa
       mara.EarnMoney() ;
       std::cout << "mara yatta6" << std::endl ;
     } else if ( dice == 6 ) {
       mara.TwiceMoney() ;
     } else {
-     assert(!"不正なダイス") ;
+      assert(!"不正なダイス") ;
+    }
+    if ( mara.GetMoney() > 0 ) {
+      mara_part.push_back( mara.CreateMemento() ) ;
+    } else {
+      mara.RestoreMemento( *mara_part.cbegin() ) ;
+      std::cout << "kurushii" << std::endl ;
     }
   }
+
 }
 
 
