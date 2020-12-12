@@ -1,11 +1,6 @@
 #include "Memento.h"
 #include "smartmemory.h"
-#include <random>
-#include <vector>
-#include <string>
-#include <assert.h>
-#include <iostream>
-#include <algorithm>
+#include "StdUtil.h"
 
 class Fruit{
   public:
