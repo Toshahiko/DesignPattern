@@ -37,11 +37,11 @@ Gamer -- Memento
 
 ```plantuml
 @startuml
-class Aggregate {
+interface Aggregate {
   + {abstract} Iterator()
 }
 
-class Iterator {
+interface Iterator {
   + {abstract} hasNext()
   + {abstract} Next()
 }
@@ -74,3 +74,6 @@ BookShelfIterator o-left-> BookShelf
 BookShelf o-down-> Book
 @enduml
 ```
+
+Iterator Patternは意外と難しかった
+BookShelfがIteratorを生成するという発想が思いつかなかった

@@ -6,6 +6,7 @@
 
 class Object {
 public:
+  Object() = default ;
   virtual ~Object() = default ;
 } ;
 
@@ -14,7 +15,7 @@ public:
   virtual ~Iterator() = default ;
   virtual bool HasNext() const = 0 ;
   virtual void Next() = 0 ;
-  virtual Object* Item() = 0 ;
+  virtual std::shared_ptr<Object> Item() = 0 ;
 } ;
 
 class Aggregate {
@@ -37,11 +38,11 @@ private:
 class BookShelf : public Aggregate {
 public:
   ~BookShelf() = default ;
-  Book* GetBookAt( int i ) const {
+  std::shared_ptr<Book> GetBookAt( int i ) const {
     return books.at( i ) ;
   }
   
-  void AppendBook( Book* book ) {
+  void AppendBook( const std::shared_ptr<Book>& book ) {
     books.push_back( book ) ;
   }
 
@@ -52,7 +53,7 @@ public:
   std::unique_ptr<Iterator> Iter() override ;
 
 private:
-  std::vector<Book*> books ;
+  std::vector<std::shared_ptr<Book>> books ;
 } ;
 
 class BookShelfIterator : public Iterator {
@@ -68,7 +69,7 @@ public:
     ++m_index ;
   }
 
-  Object* Item() override {
+  std::shared_ptr<Object> Item() override {
     return m_bookshelf->GetBookAt( m_index ) ;
   }
 
@@ -83,14 +84,14 @@ std::unique_ptr<Iterator> BookShelf::Iter() {
 
 int main() {
   BookShelf bookShelf ;
-  bookShelf.AppendBook(  new Book( "Googirl" ) ) ;
-  bookShelf.AppendBook(  new Book( "Yamato" ) ) ;
+  bookShelf.AppendBook( std::make_unique<Book>( "Googirl" ) ) ;
+  bookShelf.AppendBook( std::make_unique<Book>( "Yamato" ) ) ;
 
   auto it = bookShelf.Iter() ;
   for ( ; it->HasNext() ; it->Next() )
   {
     auto elm = it->Item() ;
-    auto ee = dynamic_cast<Book*>(elm) ;
+    auto ee = std::dynamic_pointer_cast<Book>(elm) ;
     std::cout << ee->GetName() << std::endl ;
   }
 }
