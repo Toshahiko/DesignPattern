@@ -1,5 +1,7 @@
 # Design Pattern
 
+本書全体の考え方
+「具体的なクラスだけでプログラミングするのではなく、**抽象クラスやインターフェイスを使ってプログラミングする**」
 ## Memento Pattern
 
 ```plantuml
@@ -77,3 +79,21 @@ BookShelf o-down-> Book
 
 Iterator Patternは意外と難しかった
 BookShelfがIteratorを生成するという発想が思いつかなかった
+
+Iteratorパターンを使う理由
+Iteratorを使うことで実装と数え上げを切り離すことができる。
+
+```
+
+while ( it.HasNext() ) {
+  Book book = (Book)it.Next() ;
+  system.out.println(book.GetName() ) ;
+}
+```
+
+上のコードでは、HasNextとNextというIteratorのインターフェイスだけを使っている。
+BookShelfの実装で使われているメソッドを使っていない。
+つまりBookShelfの実装に依存していないコードになっている。
+
+「数え上げの仕組みがAggregte役の外に置かれている」というのはIterator Patternの特徴。
+この特徴によって1つのConcreteAggregate役に対して複数のConcreteIterator役を作ることができる。
