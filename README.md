@@ -97,3 +97,60 @@ BookShelfの実装で使われているメソッドを使っていない。
 
 「数え上げの仕組みがAggregte役の外に置かれている」というのはIterator Patternの特徴。
 この特徴によって1つのConcreteAggregate役に対して複数のConcreteIterator役を作ることができる。
+
+## Adapter Pattern
+
+すでに提供されているものと必要なものの間のズレを埋めるようなデザインパターンがAdapter Pattern
+Adapter Patternには2種類ある
+
+- クラスによるAdapter Pattern（継承をつかったもの）
+- インスタンスによるAdapter Pattern（移譲を使った物）
+
+```plantuml
+@startuml
+interface Print {
+  + {abstract} PrintWeak()
+  + {abstract} PrintStrong()
+}
+
+class PrintBanner {
+  + PrintWeak()
+  + PrintStrong()
+}
+
+class Banner {
+  + ShowWithParen()
+  + ShowWithAster()
+}
+
+PrintBanner -up-|> Print
+PrintBanner -up-|> Banner
+
+@enduml
+```
+
+```plantuml
+@startuml
+interface Print {
+  + {abstract} PrintWeak()
+  + {abstract} PrintStrong()
+}
+
+class PrintBanner {
+  + PrintWeak()
+  + PrintStrong()
+}
+
+class Banner {
+  + ShowWithParen()
+  + ShowWithAster()
+}
+
+PrintBanner -up-|> Print
+PrintBanner o-right-> Banner
+
+@enduml
+```
+
+### どんな時に使うか
+
