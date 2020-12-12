@@ -21,16 +21,19 @@ public:
   virtual void PrintStrong() = 0 ;
 } ;
 
-class PrintBanner : private Banner, public Print {
+class PrintBanner : public Print {
 public:
-  PrintBanner( const std::string& message ) : Banner( message ) {}
+  PrintBanner( const std::string& message ) : m_banner( message ) {}
   void PrintWeak() override {
-    Banner::ShowWithParen() ;
+    m_banner.ShowWithParen() ;
   }
 
   void PrintStrong() override {
-    Banner::ShowWithAster() ;
+    m_banner.ShowWithAster() ;
   }
+
+private:
+  Banner m_banner ;
 } ;
 
 int main() {
