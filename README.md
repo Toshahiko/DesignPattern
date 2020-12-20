@@ -154,3 +154,44 @@ PrintBanner o-right-> Banner
 
 ### どんな時に使うか
 
+既存のクラスを再利用する。この時、既存クラスはAdaptee役になる。新しいクラスはAdapter役になる。
+ソフトウェアのバージョンアップの時。古いバージョンとの互換性を保つ必要がある。この時、新しいバージョンをAdaptee役として、古いバージョンをAdapter役とします。
+
+## Factory Method
+
+```plantuml
+@startuml
+package Framework {
+class Factory {
++ Create()
+- {abstract} CreateProduct()
+- {abstract} RegisterProduct()
+}
+
+class Product {
++ {abstract} Use()
+}
+
+Factory -right-> Product
+}
+
+package IDCard {
+class IDCardFactory {
+- owners
+- CreateProduct()
+- RegisterProduct()
++ GetOwners()
+}
+
+class IDCard {
+- owner
++ Use()
++ GetOwner()
+}
+
+ IDCardFactory -up-|> Factory
+ IDCard -up-|> Product
+ IDCardFactory -right-> IDCard
+}
+@enduml
+```
