@@ -195,3 +195,51 @@ class IDCard {
 }
 @enduml
 ```
+
+## Command Pattern
+
+オブジェクト指向プログラミングでは、クラスが仕事を行う。
+クラスが仕事を行うときは、自分のクラスや他のクラスのメソッドを呼び出す。
+その際、メソッドの履歴は通常残らない。
+履歴を管理するためには、命令を表すクラスを作成しておくと良いです。命令一つ一つをそのクラスのインスタインスとして表現する。履歴を管理するときは、このインスタンスたちを管理しておけばよい。
+
+```plantuml
+@startuml
+package Command {
+interface Command {
+  + {abstract} Execute()
+}
+class MacroCommand {
+  + Execute()
+  + Append()
+  + Undo()
+  + Clear()
+  - commands
+}
+MacroCommand -up-|> Command
+MacroCommand o--> Command
+}
+
+package Drawer {
+  class DrawCommand {
+    + Execute()
+    - drawable
+    - position
+  }
+  interface Drawable {
+    + {abstract} Draw()
+  }
+  class DrawCanvas {
+    + Draw()
+    - Paint()
+    - history
+    - color
+    - radius
+  }
+  DrawCommand -up-|> Command
+  DrawCommand o-right-> Drawable
+  DrawCanvas -up-|> Drawable
+  DrawCanvas o--> MacroCommand
+}
+@enduml
+```

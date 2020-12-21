@@ -2,41 +2,75 @@
 
 #include <memory>
 #include <vector>
-class Command ;
-
-class Invoker {
-public:
-  void AddCommand( const std::unique_ptr<Command>& command ) ;
-  bool UndoCommand( const std::unique_ptr<Command>& command ) ;
-  void Execute() ;
-private:
-  std::vector<std::unique_ptr<Command>> m_commands ;
-} ;
+#include <algorithm>
+#include <iostream>
 
 class Command {
 public:
-  virtual void Execute() ;
+  virtual void Execute() = 0 ;
+  virtual ~Command() = default ;
 } ;
 
-class Receiver ;
-
-class ConcreteCommand : public Command
+class MacroCommand : public Command
 {
 public:
-  void SetReceiver( const std::unique_ptr<Receiver>& receiver ) ;
-  void Execute() override ;
+  void Append( std::unique_ptr<Command>&& command ) {
+    m_commands.push_back( std::move( command ) ) ;
+  }
+  void Undo() {
+    m_commands.pop_back() ;
+  }
+  void Clear() {
+    m_commands.clear() ;
+  }
+  void Execute() override {
+    std::for_each( m_commands.begin(), m_commands.end(),
+    []( std::shared_ptr<Command> command ) { command->Execute() ; } ) ;
+  }
 private:
-  int m_id ;
-  std::unique_ptr<Receiver> m_receiver ;
+  std::vector<std::shared_ptr<Command>> m_commands ;
 } ;
 
-class Receiver {
+using Position2D = std::pair<int, int> ;
+
+class Drawable {
 public:
-  virtual void Action() ;
+  virtual void Draw( const Position2D& position ) = 0 ;
+  // Drawable( const Drawable& ) = default ;
+  Drawable( Drawable&& ) = default ;
+  Drawable() = default ;
+  virtual ~Drawable() = default ;
 } ;
 
-class ConcreteReceiver : public Receiver
+class DrawCommand : public Command
 {
 public:
-  void Action() override ;
+  DrawCommand( const Position2D& position, std::unique_ptr<Drawable> drawable)
+    : m_position( position ), m_drawable( std::move( drawable ) ) {
+  }
+  void Execute() override {
+    m_drawable->Draw( m_position ) ;
+  }
+private:
+  std::shared_ptr<Drawable> m_drawable ;
+  Position2D m_position ;
+} ;
+
+class DrawCanvas : public Drawable
+{
+public:
+  DrawCanvas( int color, int radius ) : m_color( color ), m_radius( radius ) {
+  }
+  void Draw( const Position2D& position ) override {
+    Paint( position ) ;
+  }
+private:
+  void Paint( const Position2D& position ) {
+    std::cout << "color" << std::endl ;
+  }
+
+private:
+  int m_color ;
+  int m_radius ;
+
 } ;
