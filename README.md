@@ -243,3 +243,61 @@ package Drawer {
 }
 @enduml
 ```
+
+## Visitor Pattern
+
+訪問者を表すクラスVisitor。データ構造と処理を分離するためにこのパターンを使う。
+仮にデータ構造に処理のメソッドを書いていた場合、新しい処理を追加する時に、データ構造のクラスを修正する必要が出てくる。
+Visitorパターンを使うとデータ構造に新たな処理を追加することが簡単にできる。
+
+```plantuml
+@startuml
+class Visitor {
+  + {abstract} Visit(File)
+  + {abstract} Visit(Directory)
+}
+
+class ListVisitor {
+  - currentDir
+  + Visit(File)
+  + Visit(Directory)
+}
+ListVisitor -up-|> Visitor
+
+interface Element {
+  + {abstract} Accept()
+}
+
+class Entry {
+  + GetName()
+  + GetSize()
+  + Add()
+  + Iterator()
+}
+
+class File {
+  - name
+  - size
+  + Accept()
+  + GetName()
+  + GetSize()
+}
+
+class Directory {
+  - name
+  - dir
+  + Accept()
+  + GetName()
+  + GetSize()
+  + Add()
+  + Iterator()
+}
+
+Entry -up-|> Element
+Directory -up-|> Entry
+File -up-|> Entry
+@enduml
+```
+
+コード例はディレクトリとファイルの構造に対してVisitorパターンを適用する。
+ディレクトリ構造はComposite Patternで実装する。Leafはファイル、Compositeはディレクトリ。
