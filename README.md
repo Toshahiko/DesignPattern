@@ -244,6 +244,42 @@ package Drawer {
 @enduml
 ```
 
+## Composite Pattern
+
+容器と中身を同一視して再帰的な構造を作る。
+例として、ディレクトリ構造をあげる。ディレクトリの中にはディレクトリかファイルが追加される。このとき、ディレクトリ=容器、ファイル＝中身である。この構造をクラスで表す。
+クラス図は以下。
+
+```plantuml
+@startuml
+class Entry {
+  + {abstract} GetName()
+  + {abstract} GetSize()
+  + {abstract} Add()
+}
+
+class File {
+  - m_name
+  - m_size
+  + GetName()
+  + GetSize()
+}
+
+class Directory {
+  - m_name
+  - m_entries
+  + GetName()
+  + GetSize()
+  + Add()
+}
+File -up-|> Entry
+Directory -up-|> Entry
+Directory o-up-> Entry
+@enduml
+```
+
+ディレクトリのサイズを表すコードを書いてみる。
+
 ## Visitor Pattern
 
 訪問者を表すクラスVisitor。データ構造と処理を分離するためにこのパターンを使う。
