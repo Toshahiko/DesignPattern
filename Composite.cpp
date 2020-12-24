@@ -7,6 +7,7 @@ class Entry {
 public:
   virtual std::string GetName() const noexcept = 0 ;
   virtual int GetSize() const noexcept = 0 ;
+  virtual std::stringstream PrintList() const = 0 ;
   virtual void Add( const Entry_sp& entry ) {}
 } ;
 
@@ -22,7 +23,11 @@ public:
   int GetSize() const noexcept override {
     return m_size ;
   }
-
+  std::stringstream PrintList() const {
+    std::stringstream list ;
+    list << " " << GetName() << " (" << GetSize() << ")" << std::endl ;
+    return list ;
+  }
 private:
   std::string m_name ;
   int m_size ;
@@ -55,7 +60,13 @@ public:
     }
     m_entries.push_back( entry ) ;
   }
-
+  std::stringstream PrintList() const {
+    std::stringstream list ;
+    list << GetName() << " (" << GetSize() << ")" << std::endl ;
+    std::for_each( m_entries.cbegin(), m_entries.cend(),
+                  [&list]( const Entry_sp& entry){ list << " " << entry->PrintList().str() ; }) ;
+    return list ;
+  }
 private:
   std::string m_name ;
   std::vector<Entry_sp> m_entries ;
@@ -69,9 +80,10 @@ int main() {
   simsim->Add( fai ) ;
   simsim->Add( el ) ;
   auto ohon = std::make_shared<Directory>( "ohon" ) ;
+  auto goo  = std::make_shared<Directory>( "goo" ) ;
   ohon->Add( simsim ) ;
-  // ohon->Add( ohon ) ;
-  ohon->Add( simsim ) ;
+  ohon->Add( goo ) ;
   std::cout << ohon->GetSize() ;
+  std::cout << ohon->PrintList().str() ;
   
 }
