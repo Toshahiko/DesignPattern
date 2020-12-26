@@ -337,3 +337,65 @@ File -up-|> Entry
 
 コード例はディレクトリとファイルの構造に対してVisitorパターンを適用する。
 ディレクトリ構造はComposite Patternで実装する。Leafはファイル、Compositeはディレクトリ。
+
+## Builder
+
+ビルのような構造のある建築物を作る。このとき、一つ一つ部分を作成し、段階を踏んでビルを作成する。
+Builderパターンはこの作成方法をオブジェクト指向で表した物である。
+
+プログラム例は文書を作成するプログラムである。
+ここで文章とは以下の構造を持つものとする。
+
+- タイトルを一つ含む
+- 文字列をいくつか含む
+- 箇条書きの項目をいくつか含む
+
+Builderクラスは文書を構成するためのメソッドを定める。Directorクラスがそのメソッドを使ってビルドする。
+Builderクラスは抽象クラスである。具体的な文書作成処理はBuilderクラスを継承した子クラスで定義される。
+サブクラスは次の二つとする。
+
+- TextBuilder プレーンテキストを使って文書を作る
+- HTMLBUilder HTMLを使って文書を作る
+
+```plantuml
+@startuml
+class Director {
+  + Construct()
+  - m_builder
+}
+class Builder {
+  + {abstract} MakeTitle()
+  + {abstract} MakeString()
+  + {abstract} MakeItem()
+  + {abstract} Close()
+}
+class TextBuilder {
+  + MakeTitle()
+  + MakeString()
+  + MakeItem()
+  + Close()
+  + GetResult()
+  - m_buffer
+}
+class HTMLBuilder {
+  + MakeTitle()
+  + MakeString()
+  + MakeItem()
+  + Close()
+  + GetResult()
+  - filename
+  - writer
+}
+
+Director o--> Builder
+TextBuilder -up-|> Builder
+HTMLBuilder -up-|> Builder
+
+@enduml
+```
+
+Directorは抽象クラスBuilderを知っている。
+クライアント（main関数）はConcreteBuilderオブジェクトを作成し、Direcotorオブジェクトの初期化に使う。
+ConcreteBuilderは他の種類への拡張ができる。
+ただし、抽象クラスBuilderが公開するメソッドはあとで追加するのが難しい。その変更がConcreteBuilder全体におよぶ。
+
