@@ -399,3 +399,53 @@ Directorは抽象クラスBuilderを知っている。
 ConcreteBuilderは他の種類への拡張ができる。
 ただし、抽象クラスBuilderが公開するメソッドはあとで追加するのが難しい。その変更がConcreteBuilder全体におよぶ。
 
+## Bridge
+
+Bridgeは橋である。この場合は橋渡ししている場所は、「機能クラス階層」と「実装クラス階層」である。
+- 機能クラス階層
+  - あるクラスに新しいメソッドを追加したいとき、そのクラスの派生クラスを作成し派生クラスに新しいメソッドを追加する。
+  - この階層を機能クラス階層と呼ぶ。
+  - この派生クラスにまた新しいメソッドを追加したい場合、この派生クラスの派生クラスを作成し、新しいメソッドを追加する。
+- 実装クラス階層
+  - Template Methodパターンのように、親クラスでインターフェースを決定し、子クラスでその実装を定義することがある。
+  - この階層を実装クラス階層と呼ぶ。
+  - 新しい実装を追加する時は、同じ親クラスを継承して新しい子クラスで実装を書く。
+
+この二つの階層を混ぜ合わせると、訳がわからなくなる。わからなくなることを回避するために、この二つの階層を独立した二つの階層に分ける。Bridgeはこの二つの階層を橋渡しする。
+
+```plantuml
+@startuml
+class Display {
+  - impl
+  + Open()
+  + Print()
+  + Close()
+  + Draw()
+}
+
+class CountDisplay {
+  + MultiDisplay()
+}
+
+class DisplayImpl {
+  + {abstract} RawOpen()
+  + {abstract} RawPrint()
+  + {abstract} RawClose()
+}
+
+class StringDisplayImpl {
+  + RawOpen()
+  + RawPrint()
+  + RawClose()
+}
+
+CountDisplay -up-|> Display
+Display o-right-> DisplayImpl
+StringDisplayImpl -up-|> DisplayImpl
+
+@enduml
+```
+
+機能のクラス階層に新たな機能を追加した場合、それは全ての実装に反映される。
+この場合、実装を変更することなく新しい機能を追加できる。
+
