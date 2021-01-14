@@ -9,17 +9,19 @@ class Visitor ;
 
 class Element {
   public:
+  virtual ~Element() = default ;
   virtual void Accept( Visitor* visitor ) const = 0 ;
 } ;
 
 class Entry : public Element {
 public:
+  virtual ~Entry() = default ;
   virtual std::string GetName() const noexcept = 0 ;
   virtual int GetSize() const noexcept = 0 ;
   virtual void Add( const std::shared_ptr<Entry>& entry ) {} ;
 } ;
 
-class File : public Entry {
+class File final : public Entry {
 public:
   File( const std::string& name, int size )
   : m_name( name ), m_size( size ) {}
@@ -31,7 +33,7 @@ private:
   int m_size ;
 } ;
 
-class Directory : public Entry {
+class Directory final : public Entry {
 public:
   Directory( const std::string& name )
   : m_name( name ) {}
@@ -74,7 +76,7 @@ class Visitor {
   virtual void Visit( const Directory& directory ) = 0 ;
 } ;
 
-class SizeCalc : public Visitor {
+class SizeCalc final : public Visitor {
   public :
   void Visit( const File& file ) override {
     m_allSize += file.GetSize() ;
