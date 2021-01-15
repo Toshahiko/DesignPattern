@@ -9,7 +9,7 @@
 				"${file}",
 				"-std=c++2a",
 				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}"
+				"${fileDirname}/${fileBasenameNoExtension}.out"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
