@@ -20,7 +20,7 @@ namespace {
     public:
     Link( const std::string& caption, const std::string& url ) : Item( caption ), m_url( url )
     {}
-
+    virtual ~Link() = default ;
     protected:
     std::string m_url ;
   } ;
@@ -28,6 +28,7 @@ namespace {
   class Tray : public Item {
     public:
     Tray( const std::string& caption ) : Item( caption ) {}
+    virtual ~Tray() = default ;
     void Add( Item* item ) {
       m_tray.push_back( item ) ;
     }
@@ -41,6 +42,7 @@ namespace {
     Page( const std::string& title, const std::string& author )
     : m_title( title ), m_author( author ) {}
 
+    virtual ~Page() = default ;
     void Add( Item* item ) {
       m_items.push_back( item ) ;
     }
@@ -108,9 +110,9 @@ namespace {
 
   } ;
 
-  class ListFactory ;
   class Factory {
     public:
+    template<class FactoryImpl>
     static Factory* GetFactory() ;
 
     virtual Link* CreateLink( const std::string& caption, const std::string& url ) const = 0 ;
@@ -132,16 +134,19 @@ namespace {
       return new ListPage( title, author ) ;
     }
   } ;
-
+  template<class FactoryImpl>
   Factory* Factory::GetFactory() {
-    static ListFactory factory ;
+    static FactoryImpl factory ;
     return &factory ;
   }
 
+  // class TabFactory final : public Factory {
+
+  // } ;
 } // anonymous namespace
 
 int main() {
-  const auto factory = Factory::GetFactory() ;
+  const auto factory = Factory::GetFactory<ListFactory>() ;
   const auto asahi = factory->CreateLink( "朝日新聞", "http://www.asahi.com/" ) ;
   const auto yomiuri = factory->CreateLink( "読売新聞", "http://www.yomiuri.com/" ) ;
   const auto us_yahoo = factory->CreateLink( "Yahoo!", "http://www.yahoo.com/" ) ;
