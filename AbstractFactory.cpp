@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include "smartmemory.h"
 
 namespace {
   class Item {
@@ -15,6 +16,7 @@ namespace {
     protected:
     std::string m_caption ;
   } ;
+  SMART_PTR_IMPL( Item )
 
   class Link : public Item {
     public:
@@ -24,18 +26,20 @@ namespace {
     protected:
     std::string m_url ;
   } ;
+  SMART_PTR_IMPL( Link )
 
   class Tray : public Item {
     public:
     Tray( const std::string& caption ) : Item( caption ) {}
     virtual ~Tray() = default ;
-    void Add( Item* item ) {
+    void Add( const Item_sp& item ) {
       m_tray.push_back( item ) ;
     }
 
     protected:
-    std::vector<Item*> m_tray ;
+    std::vector<Item_sp> m_tray ;
   } ;
+  SMART_PTR_IMPL( Tray )
 
   class Page {
     public:
@@ -43,7 +47,7 @@ namespace {
     : m_title( title ), m_author( author ) {}
 
     virtual ~Page() = default ;
-    void Add( Item* item ) {
+    void Add( const Item_sp& item ) {
       m_items.push_back( item ) ;
     }
 
@@ -56,10 +60,11 @@ namespace {
       std::cout << filename + "を作成しました" << std::endl ;
     }
     protected:
-    std::vector<Item*> m_items ;
+    std::vector<Item_sp> m_items ;
     std::string m_title ;
     std::string m_author ;
   } ;
+  SMART_PTR_IMPL( Page )
 
   class ListLink : public Link {
     public:
@@ -115,23 +120,23 @@ namespace {
     template<class FactoryImpl>
     static Factory* GetFactory() ;
 
-    virtual Link* CreateLink( const std::string& caption, const std::string& url ) const = 0 ;
-    virtual Tray* CreateTray( const std::string& caption ) const = 0 ;
-    virtual Page* CreatePage( const std::string& title, const std::string& author ) const = 0 ;
+    virtual Link_up CreateLink( const std::string& caption, const std::string& url ) const = 0 ;
+    virtual Tray_up CreateTray( const std::string& caption ) const = 0 ;
+    virtual Page_up CreatePage( const std::string& title, const std::string& author ) const = 0 ;
   } ;
 
   class ListFactory : public Factory {
     public:
-    Link* CreateLink( const std::string& caption, const std::string& url ) const final {
-      return new ListLink( caption, url ) ;
+    Link_up CreateLink( const std::string& caption, const std::string& url ) const final {
+      return std::make_unique<ListLink>( caption, url ) ;
     }
 
-    Tray* CreateTray( const std::string& caption ) const final {
-      return new ListTray( caption ) ;
+    Tray_up CreateTray( const std::string& caption ) const final {
+      return std::make_unique<ListTray>( caption ) ;
     }
 
-    Page* CreatePage( const std::string& title, const std::string& author ) const final {
-      return new ListPage( title, author ) ;
+    Page_up CreatePage( const std::string& title, const std::string& author ) const final {
+      return std::make_unique<ListPage>( title, author ) ;
     }
   } ;
   template<class FactoryImpl>
@@ -199,39 +204,39 @@ namespace {
 
   class TableFactory final : public Factory {
     public:
-    Link* CreateLink( const std::string& caption, const std::string& url ) const final {
-      return new TableLink( caption, url ) ;
+    Link_up CreateLink( const std::string& caption, const std::string& url ) const final {
+      return std::make_unique<TableLink>( caption, url ) ;
     }
 
-    Tray* CreateTray( const std::string& caption ) const final {
-      return new TableTray( caption ) ;
+    Tray_up CreateTray( const std::string& caption ) const final {
+      return std::make_unique<TableTray>( caption ) ;
     }
 
-    Page* CreatePage( const std::string& title, const std::string& author ) const final {
-      return new TablePage( title, author ) ;
+    Page_up CreatePage( const std::string& title, const std::string& author ) const final {
+      return std::make_unique<TablePage>( title, author ) ;
     }
   } ;
 } // anonymous namespace
 
 int main() {
   const auto factory = Factory::GetFactory<TableFactory>() ;
-  const auto asahi = factory->CreateLink( "朝日新聞", "http://www.asahi.com/" ) ;
-  const auto yomiuri = factory->CreateLink( "読売新聞", "http://www.yomiuri.com/" ) ;
-  const auto us_yahoo = factory->CreateLink( "Yahoo!", "http://www.yahoo.com/" ) ;
+  const Link_sp asahi = factory->CreateLink( "朝日新聞", "http://www.asahi.com/" ) ;
+  const Link_sp yomiuri = factory->CreateLink( "読売新聞", "http://www.yomiuri.com/" ) ;
+  const Link_sp us_yahoo = factory->CreateLink( "Yahoo!", "http://www.yahoo.com/" ) ;
 
-  const auto jp_yahoo = factory->CreateLink( "Yahoo!Japan", "http://www.yahoo.co.jp" ) ;
-  const auto excite = factory->CreateLink( "Excite", "http://www.excite.com/" ) ;
-  const auto google = factory->CreateLink( "Google", "http://www.google.com/" ) ;
+  const Link_sp jp_yahoo = factory->CreateLink( "Yahoo!Japan", "http://www.yahoo.co.jp" ) ;
+  const Link_sp excite = factory->CreateLink( "Excite", "http://www.excite.com/" ) ;
+  const Link_sp google = factory->CreateLink( "Google", "http://www.google.com/" ) ;
 
-  const auto traynews = factory->CreateTray( "新聞" ) ;
+  const Tray_sp traynews = factory->CreateTray( "新聞" ) ;
   traynews->Add( asahi ) ;
   traynews->Add( yomiuri ) ;
 
-  const auto trayyahoo = factory->CreateTray( "yahoo!" ) ;
+  const Tray_sp trayyahoo = factory->CreateTray( "yahoo!" ) ;
   trayyahoo->Add( us_yahoo ) ;
   trayyahoo->Add( jp_yahoo ) ;
 
-  const auto traysearch = factory->CreateTray( "サーチエンジン" ) ;
+  const Tray_sp traysearch = factory->CreateTray( "サーチエンジン" ) ;
   traysearch->Add( trayyahoo ) ;
   traysearch->Add( excite ) ;
   traysearch->Add( google ) ;
