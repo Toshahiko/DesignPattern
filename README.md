@@ -449,3 +449,107 @@ StringDisplayImpl -up-|> DisplayImpl
 機能のクラス階層に新たな機能を追加した場合、それは全ての実装に反映される。
 この場合、実装を変更することなく新しい機能を追加できる。
 
+## Facade
+
+プログラムが大きくなると、各クラスが複雑に絡み合う。相互に関係するクラスを正しい順序で呼び出したりする必要が出てくる。
+この問題を解消するために窓口役クラスを用意し、その窓口に対して処理を要求する形でクラス間協調を行う。
+
+サンプルプログラムはユーザのホームページを作るもの。
+三つのクラスが登場する。メールアドレスから名前を取得するデータベースクラス、HTMLファイルを作成するクラス、Facade役としてAPIを提供するPageMakerクラス。
+
+```plantuml
+@startuml
+class PageMaker {
+  + MakeWelcomePage()
+}
+class Database {
+  + GetProperties()
+}
+class HtmlWriter {
+  + Title()
+  + Mailto()
+  + Paragragh()
+  + Close()
+  + Link()
+}
+
+PageMaker -down-> Database
+PageMaker -down-> HtmlWriter
+
+Main -down-> PageMaker
+@enduml
+```
+
+## Mediator
+
+Mediatorとは相談役。たくさんのクラス間を繋ぎ円滑にするもの。
+個々のクラスはMediatorに報告し、クラスへの指示はMediatorだけが行う。
+個々のクラスはColleagueと呼ばれる。
+
+サンプルプログラムは「名前とパスワードを入力するログインダイアログのアプリケーション」
+ここで取り上げている問題は、複数のダイアログコントロールが協調する必要があるので、お互いのメッセージパッシングが複雑になる。
+再利用できる部分はColleagueを実装したConcreteColleague達。サンプルプログラムだと、各ダイアログコントロールである。
+
+```plantuml
+@startuml
+class Mediator {
+  +{abstract} CreateColleagues()
+  +{abstract} ColleagueChanged()
+}
+class Colleague {
+  +{abstract} SetMediator()
+  +{abstract} SetColleagueEnabled()
+}
+class ColleagueButton{
+  -mediator
+  +SetMediator()
+  +SetColleagueEnabled()
+}
+class ColleagueTextField {
+  -mediator
+  +SetMediator()
+  +SetColleagueEnabled()
+  +TextValueChanged()
+}
+class ColleagueCheckbox {
+  -mediator
+  +SetMediator()
+  +SetColleagueEnabled()
+  +ItemStateChanged()
+}
+class LoginFrame {
+  -checkGuest
+  -checkLogin
+  -textUser
+  -textPass
+  -buttonOk
+  -buttonCancel
+  +CreateCollegues()
+  +ColleagueChanged()
+  +UserpassChanged()
+  +ActionPerformed()
+}
+class Main
+
+Colleague -[hidden]le- Mediator
+ColleagueButton -[hidden]do- ColleagueTextField
+ColleagueTextField -[hidden]do- ColleagueCheckbox
+
+LoginFrame -up-|> Mediator
+LoginFrame -up-|> Frame
+LoginFrame o-right-> ColleagueButton
+LoginFrame o-right-> ColleagueTextField
+LoginFrame o-right-> ColleagueCheckbox
+ColleagueButton -up-|> Colleague
+ColleagueTextField -up-|> Colleague
+ColleagueCheckbox -up-|> Colleague
+
+ColleagueButton o-up-> Mediator
+ColleagueTextField o-up-> Mediator
+ColleagueCheckbox o-up-> Mediator
+ColleagueButton -right-|> Button
+ColleagueTextField -right-|> TextField
+ColleagueCheckbox -right-|> Checkbox
+
+@enduml
+```
