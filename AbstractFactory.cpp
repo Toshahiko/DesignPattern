@@ -140,13 +140,81 @@ namespace {
     return &factory ;
   }
 
-  // class TabFactory final : public Factory {
+  class TableLink final : public Link {
+    public:
+    TableLink( const std::string& caption, const std::string& url )
+      : Link( caption, url ) {}
 
-  // } ;
+    std::string MakeHTML() const final {
+      return "<td><a href=¥" + m_url + "¥>" + m_caption + "</a></td>\n" ;
+    }
+  } ;
+
+  class TableTray final : public Tray {
+    public:
+    TableTray( const std::string& caption ) : Tray( caption )
+    {}
+
+    std::string MakeHTML() const final {
+      std::stringstream ss ;
+      ss << "<td>" ;
+      ss << "<table width=¥100¥ border=¥1¥><tr>" ;
+      ss << "<td bgcolor =¥#cccccc¥ align=¥center¥ colspan=¥"
+         << m_tray.size()
+         << "¥><b>"
+         << m_caption
+         << "</b></td>" ;
+
+      ss << "</tr>\n" ;
+      ss << "<tr>\n" ;
+      std::for_each( m_tray.cbegin(), m_tray.cend(),
+        [ &ss ] ( const auto& item ) { ss << item->MakeHTML() ; } ) ;
+
+      ss << "</tr></table>" ;
+      ss << "</td>" ;
+      return ss.str() ;
+    }
+  } ;
+
+  class TablePage final : public Page {
+    public:
+    TablePage( const std::string& title, const std::string& author )
+      : Page( title, author) {}
+
+    std::string MakeHTML() const final {
+      std::stringstream ss ;
+      ss << "<html><head><title>" << m_title << "</title></head>\n" ;
+      ss << "<body>\n" ;
+      ss << "<h1>" << m_title << "</h1>\n" ;
+      ss << "<table width=¥80¥ border=¥3¥>\n" ;
+      std::for_each( m_items.begin(), m_items.end(),
+        [ &ss ] ( const auto& item ) { ss << "<tr>" << item->MakeHTML() << "</tr>" ; } ) ;
+
+      ss << "</table>\n" ;
+      ss << "<hr><address>" << m_author << "</address>" ;
+      ss << "</body></html>\n" ;
+      return ss.str() ;
+    }
+  } ;
+
+  class TableFactory final : public Factory {
+    public:
+    Link* CreateLink( const std::string& caption, const std::string& url ) const final {
+      return new TableLink( caption, url ) ;
+    }
+
+    Tray* CreateTray( const std::string& caption ) const final {
+      return new TableTray( caption ) ;
+    }
+
+    Page* CreatePage( const std::string& title, const std::string& author ) const final {
+      return new TablePage( title, author ) ;
+    }
+  } ;
 } // anonymous namespace
 
 int main() {
-  const auto factory = Factory::GetFactory<ListFactory>() ;
+  const auto factory = Factory::GetFactory<TableFactory>() ;
   const auto asahi = factory->CreateLink( "朝日新聞", "http://www.asahi.com/" ) ;
   const auto yomiuri = factory->CreateLink( "読売新聞", "http://www.yomiuri.com/" ) ;
   const auto us_yahoo = factory->CreateLink( "Yahoo!", "http://www.yahoo.com/" ) ;
@@ -168,7 +236,7 @@ int main() {
   traysearch->Add( excite ) ;
   traysearch->Add( google ) ;
 
-  const auto page = factory->CreatePage( "LinkPage", "谷本和彦" ) ;
+  const auto page = factory->CreatePage( "TablePage", "谷本和彦" ) ;
   page->Add( traynews ) ;
   page->Add( trayyahoo ) ;
   page->Add( traysearch ) ;
