@@ -553,3 +553,68 @@ ColleagueCheckbox -right-|> Checkbox
 
 @enduml
 ```
+
+## Abstract Factory
+
+抽象的な工場と抽象的な部品が出てくる。抽象的な工場が抽象的な部品を組み合わせて抽象的な製品を作る。
+部品の具体的な実装には注目せず、インターフェースに注目する。そのインターフェースを使って、部品を組み立て製品にまとめる。
+
+```plantuml
+@startuml
+class Factory {
+  + GetFactory()
+  + {abstract} CreateLink()
+  + {abstract} CreateTray()
+  + {abstract} CreatePage() 
+}
+class Item {
+  - caption
+  + {abstract} MakeHTML()
+}
+class Tray {
+  - tray
+  + Add()
+  + {abstract} MakeHTML()
+}
+class Page {
+  - title
+  - author
+  + Add()
+  + Output()
+  + {abstract} MakeHTML()
+}
+class Link {
+  - url
+  + {abstract} MakeHTML()
+}
+class ListTray {
+  + MakeHTML()
+}
+class ListPage {
+  + MakeHTML()
+}
+class ListLink {
+  + MakeHTML()
+}
+class ListFactory {
+  + CreateLink()
+  + CreateTray()
+  + CreatePage()
+}
+
+ListFactory -up-|> Factory
+Tray -up-|> Item
+Tray o-up-> Item
+Link -up-|> Item
+ListLink -up-|> Link
+ListTray -up-|> Tray
+ListPage -up-|> Page
+Factory -up-> Page
+Factory -up-> Tray
+Factory -up-> Link
+ListFactory --> ListPage
+ListFactory --> ListTray
+ListFactory --> ListLink
+Link -[hidden]ri- Page
+@enduml
+```
