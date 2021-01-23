@@ -19,17 +19,17 @@ public:
     m_q.push( value ) ;
   }
 
-  bool pop( value_type& value ) {
+  std::pair<value_type, bool> pop() {
     lock_guard l( m_m ) ;
-    if ( m_q.empty() ) return false ;
-    value = std::move( m_q.front() ) ;
+    if ( m_q.empty() ) return { value_type(), false } ;
+    value_type value = std::move( m_q.front() ) ;
     m_q.pop() ;
-    return true ;
+    return { value, true } ;
   }
 
 private:
   std::queue<T> m_q ;
-  mutex m_m ;
+  mutex m_m ; // pushとpopが同じmutexでlockされるので、thread_safeである。
 } ;
 
 } // anonymous
@@ -38,7 +38,8 @@ int main() {
   locking_queue<int> q ;
   q.push( 5 ) ;
   int res = -1 ;
-  if ( !q.pop( res ) ) {
+  auto [ret, b] = q.pop() ;
+  if ( !b ) {
 
   }
 
