@@ -54,20 +54,24 @@ protected:
   static constexpr double m_leather_penalty = -1 ;
 } ;
 
-class VeteranUnit : public Unit {
+template<class U>
+class VeteranUnit : public U {
 public:
-  VeteranUnit( Unit& unit, double strength, double armor )
-    : Unit( strength, armor ), m_unit( unit ) {}
+  VeteranUnit( U&& unit, double strength_bonus, double armor_bonus )
+    : U( unit ),
+      m_strength_bonus( strength_bonus ),
+      m_armor_bonus( armor_bonus ) {}
 
   double attack() override {
-    return m_unit.attack() + m_strength ;
+    return U::attack() + m_strength_bonus ;
   }
 
   double defense() override {
-    return m_unit.defense() + m_armor ;
+    return U::defense() + m_armor_bonus ;
   }
 private :
-  Unit& m_unit ;
+  double m_strength_bonus ;
+  double m_armor_bonus ;
 } ;
 
 } // anonymous
@@ -76,9 +80,12 @@ int main() {
   Knight akatuki( 1, 2 ) ;
   Ogre ogre( 3, 5 ) ;
   akatuki.charge() ;
-  VeteranUnit aka( akatuki, 4, 2 ) ;
-  // VeteranUnit.charge() ; // できない
-  VeteranUnit o( ogre, 3, 1 ) ;
+  VeteranUnit<Knight> aka( std::move( akatuki ), 4, 2 ) ;
+  aka.charge() ;
+  VeteranUnit<Ogre> o( std::move( ogre) , 3, 1 ) ;
+
+  Knight hakken( 2, 3 ) ;
+  // VeteranUnit<Knight> hak( hakken, 4 , 2 ) ; // copyは不可
   std::cout << std::boolalpha ;
   std::cout << aka.hit( o ) ;
 }
