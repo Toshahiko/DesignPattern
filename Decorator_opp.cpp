@@ -90,7 +90,24 @@ using Unit_ptr = std::unique_ptr<Unit> ;
 using Knight_ptr = std::unique_ptr<Knight> ;
 using Ogre_ptr = std::unique_ptr<Ogre> ;
 
+template <typename U> class DebugDecorator : public U {
+  public:
+  using U::U ;
+  template <typename P> DebugDecorator( P && p )
+    : U( std::move( *move_cast<U>( p ) ) ) {}
 
+  double attack() override {
+    double res = U::attack() ;
+    std::cout << "Attack: " << res << std::endl ;
+    return res ;
+  }
+
+  double defense() {
+    double res = U::defense() ;
+    std::cout << "Defense: " << res << std::endl ;
+    return res ;
+  }
+} ;
 
 } // anonymous
 
@@ -105,5 +122,8 @@ int main() {
   Knight hakken( 2, 3 ) ;
   // VeteranUnit<Knight> hak( hakken, 4 , 2 ) ; // copyは不可
   std::cout << std::boolalpha ;
-  std::cout << aka->hit( *o ) ;
+  std::cout << aka->hit( *o ) << std::endl ;
+
+  DebugDecorator<Knight> aku( aka ) ;
+  aku.hit( *o ) ;
 }
