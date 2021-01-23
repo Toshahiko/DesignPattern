@@ -54,11 +54,23 @@ protected:
   static constexpr double m_leather_penalty = -1 ;
 } ;
 
+template <class To, class From>
+std::unique_ptr<To> move_cast( std::unique_ptr<From>& p ) {
+#ifndef NDEBUG
+  auto p1 = std::unique_ptr<To>( dynamic_cast<To*>( p.release() ) ) ;
+  assert( p1 ) ;
+  return p1 ;
+#else
+  return std::unique_ptr<To>( static_cast<To*>( p.release() ) ) ;
+#endif
+}
+
 template<class U>
 class VeteranUnit : public U {
 public:
-  VeteranUnit( U&& unit, double strength_bonus, double armor_bonus )
-    : U( unit ),
+template<typename P>
+  VeteranUnit( P&& p, double strength_bonus, double armor_bonus )
+    : U( std::move( *move_cast<U>( p ) ) ),
       m_strength_bonus( strength_bonus ),
       m_armor_bonus( armor_bonus ) {}
 
@@ -74,18 +86,24 @@ private :
   double m_armor_bonus ;
 } ;
 
+using Unit_ptr = std::unique_ptr<Unit> ;
+using Knight_ptr = std::unique_ptr<Knight> ;
+using Ogre_ptr = std::unique_ptr<Ogre> ;
+
+
+
 } // anonymous
 
 int main() {
-  Knight akatuki( 1, 2 ) ;
-  Ogre ogre( 3, 5 ) ;
-  akatuki.charge() ;
-  VeteranUnit<Knight> aka( std::move( akatuki ), 4, 2 ) ;
-  aka.charge() ;
-  VeteranUnit<Ogre> o( std::move( ogre) , 3, 1 ) ;
-
+  Knight_ptr akatuki( new Knight( 1, 2 ) ) ;
+  Ogre_ptr ogre( new Ogre( 3, 5 ) ) ;
+  akatuki->charge() ;
+  Knight_ptr aka( std::make_unique<VeteranUnit<Knight>>( akatuki, 4, 2 ) ) ;
+  aka->charge() ;
+  Unit_ptr o( new VeteranUnit<Ogre>( ogre, 3, 1 ) ) ;
+  // o->charge() ; // Kinghtではないのでできない。
   Knight hakken( 2, 3 ) ;
   // VeteranUnit<Knight> hak( hakken, 4 , 2 ) ; // copyは不可
   std::cout << std::boolalpha ;
-  std::cout << aka.hit( o ) ;
+  std::cout << aka->hit( *o ) ;
 }
