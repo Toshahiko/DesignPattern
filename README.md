@@ -619,3 +619,47 @@ ListFactory --> ListLink
 Link -[hidden]ri- Page
 @enduml
 ```
+
+## Flyweight
+
+オブジェクトを軽くするパターン。ここでいう重い軽いは、メモリ使用量の事。
+プログラム実行中に、余分にメモリを使いたくない場合にこのパターンを使える
+
+サンプルプログラムは大きなファイルを開いて、ファイルの内容のインスタンスを作る。
+もう一度同じファイルを開いた時に、すでにそのインスタンスがある場合はそれを共有して使う
+
+```plantuml
+@startuml
+class BigChar {
+  - charname
+  - fontdata
+  + Print()
+}
+class BigCharFactory {
+  - pool
+  - BigCharFactory()
+  + GetInstance()
+  + GetBigChar()
+}
+class BigString{
+  - bigchars
+  + Print()
+}
+class Main{}
+
+BigString -up-> BigCharFactory
+BigCharFactory o-up-> BigChar
+BigString o-up-> BigChar
+Main -le-> BigString
+@enduml
+```
+
+## Decorator
+
+すでにあるクラスに新たな機能を付け加える。
+例題はRPGゲーム。各キャラクターはUnitクラスである。騎士や敵はUnitクラスを継承してクラスで作られる。この継承したクラスに何か付け加えたい場合にdecoratorパターンを使う。Unitの参照をメンバ変数に持つクラスを作って修飾する
+
+ただし、この方法では騎士クラス特有のメソッドを継承して使うことができない。
+これに対処するために、templateを使って騎士クラス特有のメソッドを使えるようにする。
+
+他の例ではDebug用にdecoratorを使う

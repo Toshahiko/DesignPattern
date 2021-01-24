@@ -67,6 +67,34 @@ class FamilyTreeVisitor : public PetVisitor {
   size_t m_child_count ;
 } ;
 
+class Shelter {
+  public :
+  void Add( Pet* p ) {
+    m_pets.emplace_back( p ) ;
+  }
+  void Accept( PetVisitor& v ) {
+    for ( auto & p : m_pets ) {
+      p->Accept( v ) ;
+    }
+  }
+
+  private :
+  std::vector<std::unique_ptr<Pet>> m_pets ;
+} ;
+
+class Family {
+  public:
+  Family( const char* cat_color, const char* dog_color )
+    : m_cat( cat_color ), m_dog( dog_color ) {}
+  void Accept( PetVisitor& v ) {
+    m_cat.Accept( v ) ;
+    m_dog.Accept( v ) ;
+  }
+  private:
+  Cat m_cat ;
+  Dog m_dog ;
+} ;
+
 } // anonymous namespace
 
 int main() {
