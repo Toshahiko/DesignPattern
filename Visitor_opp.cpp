@@ -56,24 +56,22 @@ class BirthVisitor : public PetVisitor {
 
 class FamilyTreeVisitor : public PetVisitor {
   public:
-  void Visit( Cat* c, Pet* ) override {
+  FamilyTreeVisitor() : m_child_count( 0 ) {}
+  void Reset() { m_child_count = 0 ; }
+  size_t ChildCount() const { return m_child_count ; }
 
-    std::cout << "Kittens: " ;
-    std::for_each( c->m_children.begin(), c->m_children.end(), [] ( auto kitten ){ std::cout << kitten->Color() << "" ; } ) ;
-    std::cout << std::endl ;
-  }
-  void Visit( Dog* d, Pet* ) override {
-    std::cout << "Puppies: " ;
-    std::for_each( d->m_children.begin(), d->m_children.end(), [] ( auto puppy ) { std::cout << puppy->Color() << "" ; } ) ;
-    std::cout << std::endl ;
-  }
-
+  virtual void Visit( Cat* c, Pet* p ) override {};
+  virtual void Visit( Dog* d, Pet* p ) override {};
+  
+  private:
+  size_t m_child_count ;
 } ;
 
 } // anonymous namespace
 
 int main() {
   std::unique_ptr<Pet> c = std::make_unique<Cat>( "orange" ) ;
-  std::unique_ptr<PetVisitor> fv = std::make_unique<BirthVisitor>() ;
+  auto fv = std::make_unique<FamilyTreeVisitor>() ;
   c->Accept( *fv ) ;
+  std::cout << fv->ChildCount() << " kitten total " << std::endl ;
 }
