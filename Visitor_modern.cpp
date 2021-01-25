@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 
 namespace {
 
@@ -57,8 +58,12 @@ class ColorVisitor : public PetVisitor {
   public:
   ColorVisitor() {}
 
-  void Visit( Cat* c ) override {};
-  void Visit( Dog* d ) override {};
+  void Visit( Cat* c ) override {
+    std::cout << "cat: " << c->Color() <<std::endl ;
+  }
+  void Visit( Dog* d ) override {
+    std::cout << "dog" << d->Color() <<std::endl ;
+  }
 
   private:
 } ;
