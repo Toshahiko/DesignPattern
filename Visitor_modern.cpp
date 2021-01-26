@@ -25,6 +25,40 @@ using PetVisitor = Visitor<Dog, Cat> ;
 
 // using PetVisitor = Visitor<class Dog, class Cat> ; // 上と同じ
 
+template<typename Base, typename ... >
+class LambdaVisitor ;
+
+template<typename Base, typename T1, typename F1>
+class LambdaVisitor<Base, Visitor<T1>, F1> : private F1, public Base {
+public:
+  LambdaVisitor( F1&& f1 ) : F1( std::move( f1 ) ) {}
+  LambdaVisitor( const F1& f1 ) : F1( f1 ) {}
+  void Visit( T1* t ) override { return F1::operator()( t ) ; }
+} ;
+
+template<typename Base,
+         typename T1, typename ... T,
+         typename F1, typename ... F>
+class LambdaVisitor< Base, Visitor<T1, T ...>, F1, F ...>
+  : private F1, public LambdaVisitor<Base, Visitor<T ...>, F ...>
+{
+  public:
+  LambdaVisitor( F1&& f1, F&& ... f )
+    : F1( std::move( f1 ) ),
+      LambdaVisitor<Base, Visitor<T ...>, F ...>( std::forward<F>( f ) ...) {}
+
+  LambdaVisitor( const F1& f1, F&& ... f )
+    : F1( f1 ),
+      LambdaVisitor<Base, Visitor<T ...>, F ...>( std::forward<F>( f ) ...) {}
+
+  void Visit( T1* t ) override { return F1::operator()( t ) ; }
+} ;
+
+template<typename Base, typename ... F>
+auto lambda_visitor( F&& ... f ) {
+  return LambdaVisitor<Base, Base, F ...>( std::forward<F>( f ) ... ) ;
+}
+
 class Pet {
 public:
   virtual ~Pet() = default ;
@@ -68,6 +102,18 @@ class ColorVisitor : public PetVisitor {
   private:
 } ;
 
+void Walk( Pet& p ) {
+  auto v( lambda_visitor<PetVisitor>(
+    []( Dog* d ) { // DogとCatの順番は上と合わせる必要がある。
+      std::cout << d->Color() << std::endl ;
+    },
+    []( Cat* c ) {
+      std::cout << c->Color() << std::endl ;
+    }
+  ) );
+  p.Accept( v ) ;
+}
+
 }
 
 int main() {
@@ -75,4 +121,6 @@ int main() {
   ColorVisitor visitor ;
   c.Accept( visitor ) ;
 
+  Walk( c ) ;
+  
 }
