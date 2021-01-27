@@ -2,9 +2,6 @@
 
 namespace {
 
-class Cat ;
-class Dog ;
-
 class PetVisitor {
   public:
   virtual ~PetVisitor() = default ;
@@ -34,19 +31,21 @@ private:
   std::vector<Pet*> m_children ;
 } ;
 
-template<typename Visitable>
-class PetVisitable : public Pet {
+template<typename Base, typename Visitable>
+class VisitableBase : public Base {
 public:
-  using Pet::Pet ;
-  void Accept( VisitorBase& v ) override {
-    if ( Visitor<Visitable>* pv = dynamic_cast<Visitor<Visitable>*>( &v ) ) {
-      pv->Visit( static_cast<Visitable*>( this ) ) ;
+  using Base::Base ;
+  void Accept( VisitorBase& vb ) override {
+    if ( Visitor<Visitable>* v = dynamic_cast<Visitor<Visitable>*>( &vb ) ) {
+      v->Visit( static_cast<Visitable*>( this ) ) ;
     } else {
       assert( false ) ;
     }
   }
 } ;
 
+template<typename Visitable>
+using PetVisitable = VisitableBase<Pet, Visitable> ;
 
 
 class Cat : public PetVisitable<Cat> {
@@ -61,8 +60,18 @@ class Dog : public PetVisitable<Dog> {
 
 } ;
 
+template<typename ... V>
+struct Visitors ;
 
-class FamilyTreeVisitor : public VisitorBase, public Visitor<Cat>, public Visitor<Dog> {
+template<typename V1>
+struct Visitors<V1> : public Visitor<V1>
+{} ;
+
+template<typename V1, typename ... V>
+struct Visitors<V1, V ...> : public Visitor<V1>, Visitors<V ...>
+{} ;
+
+class FamilyTreeVisitor : public VisitorBase, public Visitors<Dog, Cat> {
   public:
   FamilyTreeVisitor() : m_child_count( 0 ) {}
   void Reset() { m_child_count = 0 ; }
