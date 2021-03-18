@@ -82,6 +82,7 @@ class SizeCalc final : public Visitor {
     m_allSize += file.GetSize() ;
   }
   void Visit( const Directory& directory ) override {
+    std::cout << directory.GetName() << std::endl ;
     for ( const auto entry : directory.GetEntries() ) {
       entry->Accept( this ) ;
     }

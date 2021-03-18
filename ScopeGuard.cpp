@@ -2,43 +2,40 @@
 #include <iostream>
 
 namespace {
-  class ScopeGuardImplBase {
+  class ScopeGuardBase {
     public:
-    ScopeGuardImplBase() : m_commit(false) {}
+    ScopeGuardBase() : m_commit(false) {}
     void Commit() const noexcept { m_commit = true ; }
-    ScopeGuardImplBase& operator=(const ScopeGuardImplBase&) = delete ;
+    ScopeGuardBase& operator=(const ScopeGuardBase&) = delete ;
 
     protected:
-    ScopeGuardImplBase( ScopeGuardImplBase&& other )
+    ScopeGuardBase( ScopeGuardBase&& other )
     : m_commit(other.m_commit) { other.Commit() ; }
-    ~ScopeGuardImplBase() {} ;
+    ~ScopeGuardBase() {} ;
     mutable bool m_commit ;
   } ;
 
-  template<class MemFunc, class Obj>
-  class ScopeGuardImpl : public ScopeGuardImplBase {
+  template<class Func>
+  class ScopeGuard : public ScopeGuardBase {
     public:
-    ScopeGuardImpl( const MemFunc& memfunc, Obj& obj ) : m_memfunc(memfunc), m_obj(obj) {}
-    ~ScopeGuardImpl() {
-      if ( !m_commit ) (m_obj.*m_memfunc)() ;
+    ScopeGuard( Func&& func ) : m_func(func) {}
+    ScopeGuard( const Func& func ) : m_func(func) {}
+    ~ScopeGuard() {
+      if ( !m_commit ) m_func() ;
     }
-    ScopeGuardImpl( ScopeGuardImpl&& other )
-    : ScopeGuardImplBase( std::move( other ) )
-    , m_memfunc( other.m_memfunc )
-    , m_obj ( other.m_obj ) {
+    ScopeGuard( ScopeGuard&& other )
+    : ScopeGuardBase( std::move( other ) )
+    , m_func( other.m_func ) {
 
     }
     private:
-    const MemFunc& m_memfunc ;
-    Obj& m_obj ;
+    const Func& m_func ;
   } ;
 
-  template<class MemFunc, class Obj>
-  auto MakeGuard( const MemFunc& memfunc, Obj& obj ) {
-    return ScopeGuardImpl<MemFunc, Obj>( memfunc, obj ) ;
+  template<class Func>
+  auto MakeGuard( Func&& func ) {
+    return ScopeGuard<Func>( std::forward<Func>( func ) )  ;
   }
-
-  using ScopeGuard = const ScopeGuardImplBase& ; // constがないとビルドエラー。一時オブジェクトを参照できない。
 
   class Record {
 
@@ -52,17 +49,6 @@ namespace {
     } ;
     Storage S ;
 
-    class StorageFinalizer {
-      public:
-      StorageFinalizer( Storage& s ) : m_s( s ) {
-
-      }
-      ~StorageFinalizer() { m_s.Finalize() ; }
-      private:
-      Storage& m_s ;
-    } ;
-
-
     class Index{
       public:
       void Insort( const Record& record ) { throw std::exception() ;}
@@ -71,11 +57,8 @@ namespace {
     public:
     void Insert( const Record& record ) {
       S.Insort( record ) ;
-      StorageFinalizer SF( S ) ;
-      // void ( Storage::*Undo )() = &Storage::Undo ; // メンバ関数ポインタを扱う
-      using StorageMemFunc = void( Storage::* )() ; // 上と同じ
-      StorageMemFunc undo = &Storage::Undo ;
-      ScopeGuard SG = MakeGuard( undo, S ) ;
+      auto SF = MakeGuard( [&]() { S.Finalize() ; }) ;
+      auto SG = MakeGuard( [&]() { S.Undo() ; }) ;
       I.Insort( record ) ;
       SG.Commit() ;
     }

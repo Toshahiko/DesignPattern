@@ -17,13 +17,8 @@ class Geometry {
 
 class Visitor {
   public:
-  virtual void Visit( double& x ) = 0 ;
-  virtual void Visit( Point& p ) = 0 ;
-  virtual void Visit( Circle& c ) = 0 ;
-  virtual void Visit( Line& l ) = 0 ;
-  static Geometry* make_geometry( Geometry::type_tag tag ) {
-
-  }
+  static Geometry* make_geometry( Geometry::type_tag tag ) ;
+  virtual void Visit( Geometry::type_tag& tag ) = 0 ;
 } ;
 
 
@@ -82,6 +77,18 @@ class Intersection : public Geometry {
   std::unique_ptr<Geometry> m_g1 ;
   std::unique_ptr<Geometry> m_g2 ;
 } ;
+
+
+Geometry* Visitor::make_geometry( Geometry:type_tag tag ) {
+  switch ( tag ) {
+    case Geometry::POINT: return new Point ;
+    case Geometry::CIRCLE: return new Circle ;
+    case Geometry::LINE: return new Line ;
+    case Geometry::INTERSECTION: return new Intersection ;
+    default : assert( false ) ;
+  }
+}
+
 
 class StringSerializeVisitor : public Visitor {
   public:
