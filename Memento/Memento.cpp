@@ -1,6 +1,6 @@
 #include "Memento.h"
-#include "smartmemory.h"
-#include "StdUtil.h"
+#include "../smartmemory.h"
+#include "../StdUtil.h"
 
 class Fruit{
   public:
@@ -30,6 +30,11 @@ public:
   int m_money ;
 };
   class Person{
+    enum class Emotion {
+      positive,
+      negative,
+      neutral,
+    } ;
     public:
     explicit Person() : m_money( 0 ) {
       std::random_device seed ;
@@ -43,17 +48,33 @@ public:
     int GetMoney() const { return m_money ; }
     void LoseMoney() {
       m_money -= 100 ;
+      m_emotion = Emotion::negative ;
     }
     void EarnMoney() {
       m_money += 100 ;
+      m_emotion = Emotion::neutral ;
     }
     void TwiceMoney(){
       m_money *= 2 ;
+      m_emotion = Emotion::positive ;
     }
     void AquireFruit( const Fruit& fruit ) {
       m_fruit.push_back( fruit ) ;
     }
     
+    void Voice() const {
+      switch( m_emotion ) {
+      case Emotion::positive:
+        std::cout << "yatta" << std::endl ; break ;
+      case Emotion::negative:
+        std::cout << "dousiyoumonai" << std::endl ;
+        break ;
+      case Emotion::neutral:
+        std::cout << "maramara" << std::endl ;
+        break ;
+      }
+    }
+
     PersonMemento CreateMemento() {
       return PersonMemento( m_money ) ;
     }
@@ -65,29 +86,32 @@ public:
     std::mt19937_64 m_engine ;
     int m_money ;
     std::vector<Fruit> m_fruit ;
+    Emotion m_emotion ;
   } ;
 }
 
 void MementoPattern() {
-  Person mara ;
-  std::vector<PersonMemento> mara_part ;
-  mara_part.push_back( mara.CreateMemento() ) ;
+  Person buhin ;
+  std::vector<PersonMemento> buhin_part ;
+  buhin_part.push_back( buhin.CreateMemento() ) ;
   for ( int i = 0 ; i < 100 ; ++i ) {
-    auto dice = mara.Diceroll() ;
+    auto dice = buhin.Diceroll() ;
     if (dice <= 3) {
-      mara.LoseMoney() ;
+      buhin.LoseMoney() ;
+      buhin.Voice() ;
     } else if ( dice <= 5 ) { // aaa
-      mara.EarnMoney() ;
-      std::cout << "mara yatta6" << std::endl ;
+      buhin.EarnMoney() ;
+      buhin.Voice() ;
     } else if ( dice == 6 ) {
-      mara.TwiceMoney() ;
+      buhin.TwiceMoney() ;
+      buhin.Voice() ;
     } else {
       assert(!"不正なダイス") ;
     }
-    if ( mara.GetMoney() > 0 ) {
-      mara_part.push_back( mara.CreateMemento() ) ;
+    if ( buhin.GetMoney() > 0 ) {
+      buhin_part.push_back( buhin.CreateMemento() ) ;
     } else {
-      mara.RestoreMemento( *mara_part.cbegin() ) ;
+      buhin.RestoreMemento( *buhin_part.cend() ) ;
       std::cout << "kurushii" << std::endl ;
     }
   }
