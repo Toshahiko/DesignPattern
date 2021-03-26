@@ -30,13 +30,31 @@ public:
   int m_money ;
 };
   class Person{
-    enum class Emotion {
-      positive,
-      negative,
-      neutral,
+    class Emotion{
+      public:
+      virtual void Voice() const = 0 ;
+      virtual ~Emotion() = default ;
     } ;
+    class NegativeEmotion : public Emotion {
+      void Voice() const override {
+        std::cout << "dousiyoumonai" << std::endl ;
+      }
+    } ;
+
+    class PositiveEmotion : public Emotion {
+      void Voice() const override {
+        std::cout << "yatta" << std::endl ;
+      }
+    } ;
+
+    class NeutralEmotion : public Emotion {
+      void Voice() const override {
+        std::cout << "maramara" << std::endl ;
+      }
+    } ;
+
     public:
-    explicit Person() : m_money( 0 ) {
+    explicit Person() : m_money( 0 ), m_emotion( std::make_unique<NeutralEmotion>() ) {
       std::random_device seed ;
       m_engine.seed( seed() ) ;
     }
@@ -48,31 +66,22 @@ public:
     int GetMoney() const { return m_money ; }
     void LoseMoney() {
       m_money -= 100 ;
-      m_emotion = Emotion::negative ;
+      m_emotion = std::make_unique<NegativeEmotion>() ;
     }
     void EarnMoney() {
       m_money += 100 ;
-      m_emotion = Emotion::neutral ;
+      m_emotion = std::make_unique<NeutralEmotion>() ;
     }
     void TwiceMoney(){
       m_money *= 2 ;
-      m_emotion = Emotion::positive ;
+      m_emotion = std::make_unique<PositiveEmotion>() ;
     }
     void AquireFruit( const Fruit& fruit ) {
       m_fruit.push_back( fruit ) ;
     }
     
     void Voice() const {
-      switch( m_emotion ) {
-      case Emotion::positive:
-        std::cout << "yatta" << std::endl ; break ;
-      case Emotion::negative:
-        std::cout << "dousiyoumonai" << std::endl ;
-        break ;
-      case Emotion::neutral:
-        std::cout << "maramara" << std::endl ;
-        break ;
-      }
+      m_emotion->Voice() ;
     }
 
     PersonMemento CreateMemento() {
@@ -86,7 +95,7 @@ public:
     std::mt19937_64 m_engine ;
     int m_money ;
     std::vector<Fruit> m_fruit ;
-    Emotion m_emotion ;
+    std::unique_ptr<Emotion> m_emotion ;
   } ;
 }
 
