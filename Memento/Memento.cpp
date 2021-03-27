@@ -30,31 +30,9 @@ public:
   int m_money ;
 };
   class Person{
-    class Emotion{
-      public:
-      virtual void Voice() const = 0 ;
-      virtual ~Emotion() = default ;
-    } ;
-    class NegativeEmotion : public Emotion {
-      void Voice() const override {
-        std::cout << "dousiyoumonai" << std::endl ;
-      }
-    } ;
-
-    class PositiveEmotion : public Emotion {
-      void Voice() const override {
-        std::cout << "yatta" << std::endl ;
-      }
-    } ;
-
-    class NeutralEmotion : public Emotion {
-      void Voice() const override {
-        std::cout << "maramara" << std::endl ;
-      }
-    } ;
 
     public:
-    explicit Person() : m_money( 0 ), m_emotion( std::make_unique<NeutralEmotion>() ) {
+    explicit Person() : m_money( 0 ) {
       std::random_device seed ;
       m_engine.seed( seed() ) ;
     }
@@ -66,22 +44,22 @@ public:
     int GetMoney() const { return m_money ; }
     void LoseMoney() {
       m_money -= 100 ;
-      m_emotion = std::make_unique<NegativeEmotion>() ;
+      m_emotion = []() { std::cout << "dousiyoumonai" << std::endl ; } ;
     }
     void EarnMoney() {
       m_money += 100 ;
-      m_emotion = std::make_unique<NeutralEmotion>() ;
+      m_emotion = []() { std::cout << "maramara" << std::endl ; } ;
     }
     void TwiceMoney(){
       m_money *= 2 ;
-      m_emotion = std::make_unique<PositiveEmotion>() ;
+      m_emotion = []() { std::cout << "yatta" << std::endl ; } ;
     }
     void AquireFruit( const Fruit& fruit ) {
       m_fruit.push_back( fruit ) ;
     }
     
     void Voice() const {
-      m_emotion->Voice() ;
+      m_emotion() ;
     }
 
     PersonMemento CreateMemento() {
@@ -95,7 +73,7 @@ public:
     std::mt19937_64 m_engine ;
     int m_money ;
     std::vector<Fruit> m_fruit ;
-    std::unique_ptr<Emotion> m_emotion ;
+    std::function<void()> m_emotion ;
   } ;
 }
 
