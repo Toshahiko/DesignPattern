@@ -14,14 +14,20 @@
 class Image{
 public:
 	virtual ~Image() = default ;
-	virtual void printImage() { std::cout << "demo" << std::endl ; }
+	virtual void printImage() const = 0 ;
 } ;
 class BitmapImage : public Image {
 public:
-	void printImage() override { std::cout << "bitmap" << std::endl ; }
+	void printImage() const override { std::cout << "bitmap" << std::endl ; }
 } ;
-class PngImage : public Image {} ;
-class JpgImage : public Image {} ;
+class PngImage : public Image {
+	public:
+	void printImage() const override { std::cout << "pngmap" << std::endl ; }
+} ;
+class JpgImage : public Image {
+	public:
+	void printImage() const override { std::cout << "jpgmap" << std::endl ; }
+} ;
 
 
 struct IImageFactory 
