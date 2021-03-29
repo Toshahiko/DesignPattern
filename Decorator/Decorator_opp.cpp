@@ -91,7 +91,8 @@ using Unit_ptr = std::unique_ptr<Unit> ;
 using Knight_ptr = std::unique_ptr<Knight> ;
 using Ogre_ptr = std::unique_ptr<Ogre> ;
 
-template <typename U> class DebugDecorator : public U {
+template <typename U>
+class DebugDecorator : public U {
   public:
   using U::U ;
   template <typename P> DebugDecorator( P && p )
@@ -103,7 +104,7 @@ template <typename U> class DebugDecorator : public U {
     return res ;
   }
 
-  double defense() {
+  double defense() override {
     double res = U::defense() ;
     std::cout << "Defense: " << res << std::endl ;
     return res ;
