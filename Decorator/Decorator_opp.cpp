@@ -7,6 +7,7 @@ public:
   Unit( double strength, double armor )
   : m_strength( strength ), m_armor( armor ) {}
 
+  virtual ~Unit() = default ;
   virtual bool hit( Unit& target ) {
     return attack() > target.defense() ;
   }
