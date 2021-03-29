@@ -1,10 +1,10 @@
-#include "StdUtil.h"
+#include "../StdUtil.h"
 
 namespace Framework {
 
 class Product {
 public:
-  virtual void Use() = 0 ;
+  virtual void Execute() = 0 ;
 } ;
 
 class Factory {
@@ -28,10 +28,10 @@ class IDCard : public Framework::Product {
 public:
   explicit IDCard( const std::string& owner ) : m_owner( owner ) {
   }
-  std::string GetOwner() {
+  std::string GetOwner() const {
     return m_owner ;
   }
-  void Use() override {
+  void Execute() override {
     std::cout << m_owner << std::endl ;
   }
 private:
@@ -56,5 +56,5 @@ private:
 int main() {
   IDCard::IDCardFactory idCardfactory ;
   auto idCard = idCardfactory.Create( "buhin" ) ;
-  idCard->Use() ;
+  idCard->Execute() ;
 }
