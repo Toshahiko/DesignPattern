@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "smartmemory.h"
+#include "../smartmemory.h"
 
 namespace {
   class Item {

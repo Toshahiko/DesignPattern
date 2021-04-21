@@ -30,7 +30,7 @@ class JpgImage : public Image {
 } ;
 
 
-struct IImageFactory 
+struct IImageFactory
 {
 	virtual ~IImageFactory() = default ;
 	virtual std::shared_ptr<Image> Create( std::string_view type ) = 0 ;

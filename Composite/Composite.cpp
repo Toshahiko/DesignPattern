@@ -1,5 +1,5 @@
-#include "StdUtil.h"
-#include "smartmemory.h"
+#include "../StdUtil.h"
+#include "../smartmemory.h"
 class Entry ;
 SMART_PTR_IMPL( Entry )
 
